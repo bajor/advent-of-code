@@ -37,63 +37,117 @@ def map_raw_lists_to_ranges(numbers):
     return numbers
 
 
-def perform_mapping(source_ranges, current_stage_maps):
-    found_maps = [] 
+def perform_mapping(current_range, current_stage_maps):
+    for current_map in current_stage_maps[1]:
+        min_value = min(current_map[1])
+        max_value = max(current_map[1])
 
-    for current_range in source_ranges: 
-        for current_map in current_stage_maps[1]:
-            min_value = min(current_map[1])
-            max_value = max(current_map[1])
+        if (current_range[0] >= min_value and current_range[0] <= max_value) or (current_range[1] >= min_value and current_range[1] <= max_value):
+            source_map = current_map[1]
+            target_map = current_map[0]
 
-            if (current_range[0] >= min_value and current_range[0] <= max_value) or (current_range[1] >= min_value and current_range[1] <= max_value):
-                found_maps.append(current_map)
+            difference_from_start = current_range[0] - min(source_map)
+            current_range_len = current_range[1] - current_range[0]
+
+            target_start = target_map[0] + difference_from_start
+            target_end = target_start + current_range_len
+
+            return [target_start, target_end]
+    return current_range
 
 
+def cut_list(current_range, map_ranges):
+    start = current_range[0] 
+    end = current_range[1] 
+    breaking_start = []
+    breaking_end = []
+    breaking_points = []
 
-    # if not found_maps:
-    #     return source_range
+    for c in map_ranges:
+        breaking_start.append(c[0])
+        breaking_end.append(c[1])
+        for p in c:
+            breaking_points.append(p)
 
-    # source_map = found_map[1]
-    # target_map = found_map[0]
+    # Ensure that the start is less than or equal to the end
+    if start > end:
+        raise ValueError("Start must be less than or equal to end")
 
-    # difference_from_start = source_range - min(source_map)
-    # target_number = min(target_map) + difference_from_start
-    # return target_number
+    # Sort breaking points in ascending order
+    breaking_points.sort()
 
-def cut_list(start_end, list_of_lists):
-    start, end = start_end
-    cut_list = [lst for lst in list_of_lists if not (lst[0] > end or lst[1] < start)]
-    # Add the missing ranges
-    if start < cut_list[0][0]:
-        cut_list.insert(0, [start, cut_list[0][0] - 1])
-    for i in range(len(cut_list) - 1):
-        if cut_list[i][1] < cut_list[i + 1][0] - 1:
-            cut_list.insert(i + 1, [cut_list[i][1] + 1, cut_list[i + 1][0] - 1])
-    if end > cut_list[-1][1]:
-        cut_list.append([cut_list[-1][1] + 1, end])
-    return cut_list
+    # Initialize a list to store the split ranges
+    split_ranges = []
 
+    # Initialize variables to keep track of the current start and end of the range
+    current_start = start
+    current_end = end
+
+    # Iterate through breaking points
+    for point in breaking_points:
+        # Check if the breaking point is within the current range
+        if current_start <= point <= current_end:
+            # Split the range at the breaking point
+            split_ranges.append([current_start, point])
+            current_start = point
+
+    # Add the remaining part of the range, if any
+    if current_start < current_end:
+        split_ranges.append([current_start, current_end])
+
+    for i in range(len(split_ranges)):
+
+        if split_ranges[i][0] in breaking_end:
+            split_ranges[i][0] = split_ranges[i][0] + 1
+
+        if split_ranges[i][1] in breaking_start:
+            split_ranges[i][1] = split_ranges[i][1] - 1
+
+        if split_ranges[i][0] == split_ranges[i][1]:
+            split_ranges[i] = split_ranges[i][0]
+
+    return split_ranges
 
 def perform_complete_chain_of_mapping(ranges, maps):
-    # current_ranges = ranges
-
     for current_map in maps:
-        cutters = current_map[1]
-        cutters = [x[1] for x in cutters]
+        current_cut_map = current_map[1]
+        current_cut_map = [x[1] for x in current_cut_map]
 
-        # print(ranges)
+        # print("current map ", current_map)
+        # print("current ranges ", ranges)
 
-        for current_range in ranges:
+        def perform_stage(ranges, current_map):
+            results = []
+            for current_range in ranges:
+                cut_ranges = cut_list(current_range, current_cut_map)
 
-            print(current_range)
-            print(cutters)
-            current_range_cut = cut_list(current_range, cutters)
+                print("cut ranges", cut_ranges)
 
-            # print(12, current_range_cut)
-            # ranges = perform_mapping(ranges, current_map)
+                for cut_range in cut_ranges:
+
+                    print("cut_range, current map ", cut_range, current_map)
+
+                    result = perform_mapping(cut_range, current_map)
+                    results.append(result)
+            return results
+
+
+        print("ranges before mapping ", ranges)
+
+        ranges = perform_stage(ranges, current_map) 
+
+        print("ranges after mapping ", ranges)
+
 
         1/0
-        return ranges
+
+            # for range_
+
+            # TODO: now perform mapping. If range not in map - return as is
+
+
+
+    # 1/0
 
 
 maps = [

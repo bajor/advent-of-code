@@ -49,7 +49,7 @@ def perform_mapping_single_number(source_number, current_stage_maps):
     return target_number
 
 
-def perform_mapping(current_range, current_stage_maps):
+def perform_mapping_range(current_range, current_stage_maps):
     for current_map in current_stage_maps[1]:
         min_value = min(current_map[1])
         max_value = max(current_map[1])
@@ -60,10 +60,8 @@ def perform_mapping(current_range, current_stage_maps):
             ):
                 source_map = current_map[1]
                 target_map = current_map[0]
-
                 difference_from_start = current_range[0] - min(source_map)
                 current_range_len = current_range[1] - current_range[0]
-
                 target_start = target_map[0] + difference_from_start
                 target_end = target_start + current_range_len
 
@@ -96,8 +94,10 @@ def cut_list(current_range, map_ranges):
         if current_start <= point <= current_end:
             split_ranges.append([current_start, point])
             current_start = point
+
     if current_start < current_end:
         split_ranges.append([current_start, current_end])
+
     for i in range(len(split_ranges)):
         if (split_ranges[i][0] in breaking_end) and (
             split_ranges[i][0] < split_ranges[i][1]
@@ -112,36 +112,34 @@ def cut_list(current_range, map_ranges):
     return split_ranges
 
 
+def perform_stage_mapping(ranges, current_map, current_cut_map):
+    results = []
+    for current_range in ranges:
+        cut_ranges = cut_list(current_range, current_cut_map)
+
+        if isinstance(current_range, int):
+            result = perform_mapping_single_number(current_range, current_map)
+            results.append(result)
+        else:
+            for cut_range in cut_ranges:
+                result = perform_mapping_range(cut_range, current_map)
+                results.append(result)
+    return results
+
+
 def perform_complete_chain_of_mapping(ranges, maps):
     for current_map in maps:
         current_cut_map = current_map[1]
         current_cut_map = [x[1] for x in current_cut_map]
-
-        def perform_stage_mapping(ranges, current_map):
-            results = []
-            for current_range in ranges:
-                cut_ranges = cut_list(current_range, current_cut_map)
-
-                if isinstance(current_range, int):
-                    result = perform_mapping_single_number(current_range, current_map)
-                    results.append(result)
-                else:
-                    for cut_range in cut_ranges:
-                        result = perform_mapping(cut_range, current_map)
-                        results.append(result)
-            return results
-
-        ranges = perform_stage_mapping(ranges, current_map)
+        ranges = perform_stage_mapping(ranges, current_map, current_cut_map)
     return ranges
 
 
 seeds = [[seeds[i], seeds[i] + seeds[i + 1]] for i in range(0, len(seeds) - 1, 2)]
-
 maps = [
     [header, map_raw_lists_to_ranges(number_list)]
     for header, number_list in maps.items()
 ]
-
 output = perform_complete_chain_of_mapping(seeds, maps)
 result = []
 

@@ -28,7 +28,7 @@ def map_raw_lists_to_ranges(numbers):
     return numbers
 
 
-def perform_mapping_single_number(source_number, current_stage_maps):
+def map_single_number(source_number, current_stage_maps):
     found_map = None
 
     for current_map in current_stage_maps[1]:
@@ -49,7 +49,7 @@ def perform_mapping_single_number(source_number, current_stage_maps):
     return target_number
 
 
-def perform_mapping_range(current_range, current_stage_maps):
+def map_range(current_range, current_stage_maps):
     for current_map in current_stage_maps[1]:
         min_value = min(current_map[1])
         max_value = max(current_map[1])
@@ -118,16 +118,16 @@ def perform_stage_mapping(ranges, current_map, current_cut_map):
         cut_ranges = cut_list(current_range, current_cut_map)
 
         if isinstance(current_range, int):
-            result = perform_mapping_single_number(current_range, current_map)
+            result = map_single_number(current_range, current_map)
             results.append(result)
         else:
             for cut_range in cut_ranges:
-                result = perform_mapping_range(cut_range, current_map)
+                result = map_range(cut_range, current_map)
                 results.append(result)
     return results
 
 
-def perform_complete_chain_of_mapping(ranges, maps):
+def perform_chain_of_mapping(ranges, maps):
     for current_map in maps:
         current_cut_map = current_map[1]
         current_cut_map = [x[1] for x in current_cut_map]
@@ -140,7 +140,7 @@ maps = [
     [header, map_raw_lists_to_ranges(number_list)]
     for header, number_list in maps.items()
 ]
-output = perform_complete_chain_of_mapping(seeds, maps)
+output = perform_chain_of_mapping(seeds, maps)
 result = []
 
 for o in output:

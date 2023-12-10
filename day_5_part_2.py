@@ -2,11 +2,6 @@ maps = {}
 seeds = []
 
 
-# TODO: 
-# divide this into ranges for each map. Then map these ranges. Do this iteration for each map. 1 - see what maps we have - based on that divide our ranges to it. Map all ranges (shift values or leave if no corresponding map).
-
-
-# with open("test.txt", "r") as file:
 with open("day_5.txt", "r") as file:
     for line in file:
         if line.strip():
@@ -16,11 +11,8 @@ with open("day_5.txt", "r") as file:
                 current_header = line[:-6].strip()
                 maps[current_header] = []
             else:
-                numbers = list(map(int, line.split()))
-                maps[current_header].append(numbers)
-
-
-seeds = [[seeds[i], seeds[i] + seeds[i + 1]] for i in range(0, len(seeds) - 1, 2)]
+                result = list(map(int, line.split()))
+                maps[current_header].append(result)
 
 
 def map_raw_lists_to_ranges(numbers):
@@ -58,15 +50,14 @@ def perform_mapping_single_number(source_number, current_stage_maps):
 
 
 def perform_mapping(current_range, current_stage_maps):
-
     for current_map in current_stage_maps[1]:
         min_value = min(current_map[1])
         max_value = max(current_map[1])
 
-        # print("current range ", current_range)
-
         if isinstance(current_range, list):
-            if (current_range[0] >= min_value and current_range[0] <= max_value) or (current_range[1] >= min_value and current_range[1] <= max_value):
+            if (current_range[0] >= min_value and current_range[0] <= max_value) or (
+                current_range[1] >= min_value and current_range[1] <= max_value
+            ):
                 source_map = current_map[1]
                 target_map = current_map[0]
 
@@ -84,8 +75,8 @@ def cut_list(current_range, map_ranges):
     if isinstance(current_range, int):
         return current_range
 
-    start = current_range[0] 
-    end = current_range[1] 
+    start = current_range[0]
+    end = current_range[1]
     breaking_start = []
     breaking_end = []
     breaking_points = []
@@ -95,11 +86,6 @@ def cut_list(current_range, map_ranges):
         breaking_end.append(c[1])
         for p in c:
             breaking_points.append(p)
-
-    if start > end:
-        # print(current_range, map_ranges, start,  end)
-
-        raise ValueError("Start must be less than or equal to end")
 
     breaking_points.sort()
     split_ranges = []
@@ -113,13 +99,16 @@ def cut_list(current_range, map_ranges):
     if current_start < current_end:
         split_ranges.append([current_start, current_end])
     for i in range(len(split_ranges)):
-        if (split_ranges[i][0] in breaking_end) and (split_ranges[i][0] < split_ranges[i][1]):
+        if (split_ranges[i][0] in breaking_end) and (
+            split_ranges[i][0] < split_ranges[i][1]
+        ):
             split_ranges[i][0] = split_ranges[i][0] + 1
-        if (split_ranges[i][1] in breaking_start) and (split_ranges[i][1] > split_ranges[i][0]):
+        if (split_ranges[i][1] in breaking_start) and (
+            split_ranges[i][1] > split_ranges[i][0]
+        ):
             split_ranges[i][1] = split_ranges[i][1] - 1
         if split_ranges[i][0] == split_ranges[i][1]:
             split_ranges[i] = split_ranges[i][0]
-
     return split_ranges
 
 
@@ -142,37 +131,25 @@ def perform_complete_chain_of_mapping(ranges, maps):
                         results.append(result)
             return results
 
-
-        ranges = perform_stage_mapping(ranges, current_map) 
-
-        # print("ranges after stage mapping, ", ranges)
-
-        # 1/0
+        ranges = perform_stage_mapping(ranges, current_map)
     return ranges
+
+
+seeds = [[seeds[i], seeds[i] + seeds[i + 1]] for i in range(0, len(seeds) - 1, 2)]
 
 maps = [
     [header, map_raw_lists_to_ranges(number_list)]
     for header, number_list in maps.items()
 ]
 
-
 output = perform_complete_chain_of_mapping(seeds, maps)
-
-numbers = []
+result = []
 
 for o in output:
     if isinstance(o, int):
-        numbers.extend([o])
+        result.extend([o])
     else:
-        numbers.extend(o)
+        result.extend(o)
 
-# print(numbers)
-
-
-numbers = sorted(numbers)
-
-
-print(numbers)
-# print(min(numbers))
-
-# print(output)
+result = sorted(result)
+print(result[1])

@@ -2,10 +2,6 @@ times = [42, 68, 69, 85]
 distances = [284, 1005, 1122, 1341]
 
 
-max_time = times[0]
-best_distance = distances[0]
-
-
 def calculate_distances(max_time):
     result = []
 
@@ -16,16 +12,15 @@ def calculate_distances(max_time):
     return result
 
 
+max_time = times[0]
+best_distance = distances[0]
 total_ways_to_win = []
-
 
 for max_time, best_distance in zip(times, distances):
     result = calculate_distances(max_time)
     result = [x for x in result if x > best_distance]
     ways_to_win = len(result)
     total_ways_to_win.append(ways_to_win)
-
-
 
 print(
     total_ways_to_win[0]

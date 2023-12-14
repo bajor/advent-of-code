@@ -27,8 +27,6 @@ def is_four_of_kind(cards):
 def is_full_house(cards):
     score = cards[1]
     cards = cards[0]
-    if len(cards) != 5:
-        return False
     char_counts = {}
     for char in cards:
         if char in char_counts:
@@ -196,5 +194,13 @@ print(final_score)
 # 200787843 - too low
 # 250263225 - too low
 
-for r in ranking:
-    print(r)
+# for r in ranking:
+    # print(r)
+
+"""
+!!!!! to nie jest poker tylko taki cyrk:
+
+If these cards are different, the hand with the stronger first card is considered stronger. If the first card in each hand have the same label, however, then move on to considering the second card in each hand. If they differ, the hand with the higher second card wins; otherwise, continue with the third card in each hand, then the fourth, then the fifth.
+
+So, 33332 and 2AAAA are both four of a kind hands, but 33332 is stronger because its first card is stronger. Similarly, 77888 and 77788 are both a full house, but 77888 is stronger because its third card is stronger (and both hands have the same first and second card).
+"""

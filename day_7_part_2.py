@@ -118,6 +118,12 @@ def sort_cards(hands_type):
     return hands_type
 
 
+def split_j(cards_score, j_count):
+    cards_j = list(filter(lambda x: x[0].count("J") == j_count, cards_score))
+    cards_no_j = list(filter(lambda x: x[0].count("J") != j_count, cards_score))
+    return cards_j, cards_no_j
+
+
 five_of_kind = []
 four_of_kind = []
 full_house = []
@@ -149,12 +155,6 @@ for i in range(len(lines)):
         one_pair.append(is_one_pair(lines[i]))
         continue
     high_card.append(lines[i])
-
-
-def split_j(cards_score, j_count):
-    cards_j = list(filter(lambda x: x[0].count("J") == j_count, cards_score))
-    cards_no_j = list(filter(lambda x: x[0].count("J") != j_count, cards_score))
-    return cards_j, cards_no_j
 
 
 four_to_five_j, four_of_kind = split_j(four_of_kind, 1)
@@ -190,6 +190,7 @@ three.extend(one_pair_to_three_j)
 three.extend(one_pair_to_three_jj)
 
 one_pair.extend(high_card_to_pair_j)
+
 
 ranking = []
 

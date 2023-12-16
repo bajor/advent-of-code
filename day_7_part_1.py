@@ -2,31 +2,25 @@ import re
 
 
 with open("day_7.txt") as file:
-# with open("test.txt") as file:
     lines = [x.strip() for x in file]
 
 
-def is_five_of_kind(cards):
-    score = cards[1]
-    cards = cards[0]
+def is_five_of_kind(cards_score):
+    cards = cards_score[0]
     if all(x == cards[0] for x in cards):
-        return cards[0], score
+        return cards_score
 
 
-def is_four_of_kind(cards):
-    score = cards[1]
-    cards = cards[0]
-    if (cards.count(cards[0]) == 4):
-        remaining = [x for x in cards if x != cards[0]]
-        return (cards[0], remaining[0]), score
-    if (cards.count(cards[1]) == 4):
-        remaining = [x for x in cards if x != cards[1]]
-        return (cards[1], remaining[0]), score 
+def is_four_of_kind(cards_score):
+    cards = cards_score[0]
+    if cards.count(cards[0]) == 4:
+        return cards_score
+    if cards.count(cards[1]) == 4:
+        return cards_score
 
 
-def is_full_house(cards):
-    score = cards[1]
-    cards = cards[0]
+def is_full_house(cards_score):
+    cards = cards_score[0]
     char_counts = {}
     for char in cards:
         if char in char_counts:
@@ -35,14 +29,15 @@ def is_full_house(cards):
             char_counts[char] = 1
     values = list(char_counts.values())
     if (3 in values and 2 in values) or (2 in values and 3 in values):
-        char_counts = dict(sorted(char_counts.items(), key=lambda item: item[1], reverse=True))
+        char_counts = dict(
+            sorted(char_counts.items(), key=lambda item: item[1], reverse=True)
+        )
         char_counts = list(char_counts.keys())
-        return (char_counts[0], char_counts[1]), score
+        return cards_score
 
 
-def is_three(cards):
-    score = cards[1]
-    cards = cards[0]
+def is_three(cards_score):
+    cards = cards_score[0]
     if len(cards) != 5:
         return False
     char_counts = {}
@@ -53,14 +48,15 @@ def is_three(cards):
             char_counts[char] = 1
     values = list(char_counts.values())
     if 3 in values:
-        char_counts = dict(sorted(char_counts.items(), key=lambda item: item[1], reverse=True))
+        char_counts = dict(
+            sorted(char_counts.items(), key=lambda item: item[1], reverse=True)
+        )
         char_counts = list(char_counts.keys())
-        return char_counts[0], (char_counts[1], char_counts[2]), score
+        return cards_score
 
 
-def is_pairs(cards, pairs_amount):
-    score = cards[1]
-    cards = cards[0]
+def is_pairs(cards_score, pairs_amount):
+    cards = cards_score[0]
     if len(cards) != 5:
         return False
     char_counts = {}
@@ -72,14 +68,18 @@ def is_pairs(cards, pairs_amount):
     pair_count = sum(count // 2 for count in char_counts.values())
 
     if pair_count == pairs_amount and pairs_amount == 2:
-        char_counts = dict(sorted(char_counts.items(), key=lambda item: item[1], reverse=True))
+        char_counts = dict(
+            sorted(char_counts.items(), key=lambda item: item[1], reverse=True)
+        )
         char_counts = list(char_counts.keys())
-        return (char_counts[0], char_counts[1]), char_counts[2], score
+        return cards_score
 
     if pair_count == pairs_amount and pairs_amount == 1:
-        char_counts = dict(sorted(char_counts.items(), key=lambda item: item[1], reverse=True))
+        char_counts = dict(
+            sorted(char_counts.items(), key=lambda item: item[1], reverse=True)
+        )
         char_counts = list(char_counts.keys())
-        return char_counts[0], (char_counts[1], char_counts[2], char_counts[3]), score
+        return cards_score
 
 
 def is_two_pairs(cards):
@@ -92,17 +92,30 @@ def is_one_pair(cards):
 
 def rank_card(card):
     if card == "A":
-        return 14 
-    elif card == "K": 
-        return 13 
+        return 14
+    elif card == "K":
+        return 13
     elif card == "Q":
-        return 12 
+        return 12
     elif card == "J":
-        return 11 
+        return 11
     elif card == "T":
-        return 10 
+        return 10
     elif card.isdigit():
         return int(card)
+
+
+def map_cards_to_scores(cards_scores):
+    cards_scores = [(list(x), y) for x, y in cards_scores]
+    cards_scores = [([rank_card(card) for card in x], y) for x, y in cards_scores]
+    return cards_scores
+
+
+def sort_cards(hands_type):
+    hands_type = sorted(
+        hands_type, key=lambda x: [x[0][0], x[0][1], x[0][2], x[0][3], x[0][4]]
+    )
+    return hands_type
 
 
 five_of_kind = []
@@ -139,68 +152,22 @@ for i in range(len(lines)):
 
 ranking = []
 
-high_card = [(list(x[0]), x[1]) for x in high_card]
-high_card = [([rank_card(y) for y in x[0]], x[1]) for x in high_card]
-high_card = [(sorted(x[0], reverse=True), x[1]) for x in high_card]
-high_card = [(x[0][0], x[0][1], x[0][2], x[0][3], x[0][4], x[1]) for x in high_card]
-high_card = sorted(high_card, key=lambda x: (x[0], x[1], x[2], x[3], x[4]) )
-high_card = [x[-1] for x in high_card]
-ranking.extend(high_card)
+hand_types = [
+    high_card,
+    one_pair,
+    two_pairs,
+    three,
+    full_house,
+    four_of_kind,
+    five_of_kind,
+]
 
-one_pair = [(rank_card(x[0]), sorted((rank_card(x[1][0]), rank_card(x[1][1]), rank_card(x[1][2])), reverse=True), x[2]) for x in one_pair]
-one_pair = [(x[0], x[1][0], x[1][1], x[1][2], x[2]) for x in one_pair]
-one_pair = sorted(one_pair, key=lambda x: (x[0], x[1], x[2], x[3]) )
-one_pair = [x[-1] for x in one_pair]
-ranking.extend(one_pair)
-
-two_pairs = [(sorted((rank_card(x[0][0]), rank_card(x[0][1])), reverse=True), rank_card(x[1]), x[2]) for x in two_pairs]
-two_pairs = [(x[0][0], x[0][1], x[1], x[2]) for x in two_pairs]
-two_pairs = sorted(two_pairs, key=lambda x: (x[0], x[1], x[2]))
-two_pairs = [x[-1] for x in two_pairs]
-ranking.extend(two_pairs)
-
-three = [(rank_card(x[0]), sorted((rank_card(x[1][0]), rank_card(x[1][1])), reverse=True),  x[2]) for x in three]
-three = [(x[0], x[1][0], x[1][1], x[2]) for x in three]
-three = sorted(three, key=lambda x: (x[0], x[1], x[2]))
-three = [x[-1] for x in three]
-ranking.extend(three)
-
-full_house = [(rank_card(x[0][0]), rank_card(x[0][1]),  x[1]) for x in full_house]
-full_house = sorted(full_house, key=lambda x: (x[0], x[1]))
-full_house = [x[-1] for x in full_house]
-ranking.extend(full_house)
-
-four_of_kind = [(rank_card(x[0][0]), rank_card(x[0][1]), x[1]) for x in four_of_kind]
-four_of_kind = sorted(four_of_kind, key=lambda x: (x[0], x[1]) )
-four_of_kind = [x[-1] for x in four_of_kind]
-ranking.extend(four_of_kind)
-
-five_of_kind = [(rank_card(x[0]), x[1]) for x in five_of_kind]
-five_of_kind = sorted(five_of_kind, key=lambda x: x[0])
-five_of_kind = [x[-1] for x in five_of_kind]
-ranking.extend(five_of_kind)
-
-final_score = 0
-# print(len(ranking))
+for hand in hand_types:
+    hand = map_cards_to_scores(hand)
+    hand = sort_cards(hand)
+    ranking.extend(hand)
 
 for i in range(len(ranking)):
-    rank = i + 1
-    score = rank * ranking[i]
-    final_score += score
+    ranking[i] = (i + 1) * ranking[i][1]
 
-
-print(final_score)
-# 199657538
-# 200787843 - too low
-# 250263225 - too low
-
-# for r in ranking:
-    # print(r)
-
-"""
-!!!!! to nie jest poker tylko taki cyrk:
-
-If these cards are different, the hand with the stronger first card is considered stronger. If the first card in each hand have the same label, however, then move on to considering the second card in each hand. If they differ, the hand with the higher second card wins; otherwise, continue with the third card in each hand, then the fourth, then the fifth.
-
-So, 33332 and 2AAAA are both four of a kind hands, but 33332 is stronger because its first card is stronger. Similarly, 77888 and 77788 are both a full house, but 77888 is stronger because its third card is stronger (and both hands have the same first and second card).
-"""
+print(sum(ranking))

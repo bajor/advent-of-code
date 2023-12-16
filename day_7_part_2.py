@@ -1,6 +1,3 @@
-import re
-
-
 with open("day_7.txt") as file:
     lines = [x.strip() for x in file]
 

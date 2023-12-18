@@ -76,7 +76,6 @@ def perform_walk(staring_pos, previous_cell):
         possible_moves.remove(previous_cell)
 
         previous_cell = current_cell
-
         current_cell = possible_moves[0]
         current_cell_symbol = cells[current_cell]
 

@@ -2,6 +2,7 @@
 - isc po rurze i jakby z prawej strony zabierac wszystkie kropki
 - jesli kropka zawiera sie w rurze to jej nie zabierac
 - jesli powstale sciezki zamykaja sie - to dodac wszystie kropki wewnatrz zamknietych figur
+- rozne pola w zaleznosci jaki przeplyw, jesli | a ide z gory na dol to lewa strona inaczej prawa
 
 
 - tworzymy figury
@@ -19,7 +20,6 @@ to dolaczamy do results
     - algo na wypelnianie:
         jesli idziesz z danego punktu do gory w dol, prawo lub w lewo - to w kazdym z tych lini w pewnym momencie napotkasz kropke
         jesli nie napotkasz - to jestes outside
-
 
 
 - zrobic druga mape ktora wskazuje "wewnetrzne" kropki dla danych symboli
@@ -42,6 +42,12 @@ for i in range(MAX_ROWS):
     for j in range(MAX_COLS):
         cells[(i, j)] = lines[j][i]
 
+coords_arrow = {
+    (-1, 0) : "right",
+    (1, 0) : "left",
+    (0, -1) : "up",
+    (0, 1) : "down"
+}
 
 symbol_move = {
     "|": lambda x, y: [(x, y - 1), (x, y + 1)],
@@ -50,6 +56,36 @@ symbol_move = {
     "J": lambda x, y: [(x, y - 1), (x - 1, y)],
     "7": lambda x, y: [(x, y + 1), (x - 1, y)],
     "F": lambda x, y: [(x, y + 1), (x + 1, y)],
+}
+
+
+inner_area_symbol_direction = {
+
+    # ("|", "up") : lambda x, y: [(x+1, y)],
+    # ("|", "down") : lambda x, y: [(x-1, y)],
+    # ("-", "right") : lambda x, y: [(x, y+1)], 
+    # ("-", "left") : lambda x, y: [(x, y-1)],
+    # ("L", "down") : lambda x, y: [(x-1, y),(x-1, y+1), (x, y+1)],
+    # ("L", "left") : lambda x, y: [(x+1, y-1)],
+    # ("J", "down") : lambda x, y: [(x-1, y-1)],
+    # ("J", "right") : lambda x, y: [(x, y+1), (x+1, y+1), (x+1, y)],
+    # ("7", "up") : lambda x, y: [(x, y-1), (x+1, y-1), (x+1, y)],
+    # ("7", "right") : lambda x, y: [(x-1, y+1)],
+    # ("F", "up") : lambda x, y: [(x+1, y+1)],
+    # ("F", "left") : lambda x, y: [(x-1, y),(x-1, y-1),(x, y-1)],
+
+    ("|", "down") : lambda x, y: [(x+1, y)],
+    ("|", "up") : lambda x, y: [(x-1, y)],
+    ("-", "right") : lambda x, y: [(x, y+1)], 
+    ("-", "left") : lambda x, y: [(x, y-1)],
+    ("L", "up") : lambda x, y: [(x-1, y),(x-1, y+1), (x, y+1)],
+    ("L", "left") : lambda x, y: [(x+1, y-1)],
+    ("J", "up") : lambda x, y: [(x-1, y-1)],
+    ("J", "right") : lambda x, y: [(x, y+1), (x+1, y+1), (x+1, y)],
+    ("7", "down") : lambda x, y: [(x, y-1), (x+1, y-1), (x+1, y)],
+    ("7", "right") : lambda x, y: [(x-1, y+1)],
+    ("F", "down") : lambda x, y: [(x+1, y+1)],
+    ("F", "left") : lambda x, y: [(x-1, y),(x-1, y-1),(x, y-1)],
 }
 
 
@@ -89,7 +125,14 @@ def find_possible_starts(s_pos):
     return possible_start
 
 
+def is_possible_cell(cell):
+    if 0 <= cell[0] < MAX_COLS and 0 <= cell[1] < MAX_ROWS:
+        return True 
+
+
 def perform_walk(staring_pos, previous_cell):
+    inner_cells = []
+
     current_cell = staring_pos
     current_cell_symbol = cells[current_cell]
 
@@ -102,43 +145,92 @@ def perform_walk(staring_pos, previous_cell):
         possible_moves = find_possible_moves(current_cell, current_cell_symbol)
         if not possible_moves:
             return False
+
         possible_moves.remove(previous_cell)
 
         previous_cell = current_cell
         current_cell = possible_moves[0]
         current_cell_symbol = cells[current_cell]
 
+        move_difference = (previous_cell[0] - current_cell[0], previous_cell[1] - current_cell[1])
+        move_difference = coords_arrow[move_difference]
+
+        inner_cells.append(find_innner_cells(current_cell, current_cell_symbol, move_difference))
+
         walk_history.append((current_cell, current_cell_symbol))
 
         if current_cell_symbol == "S":
-            return walk_history
+            return walk_history, inner_cells
 
 
-s_pos = find_s(lines)
-starts = find_possible_starts(s_pos)
-pipe_path = None
-correct_start = None
-
-for start in starts:
-    try:
-        pipe_path = perform_walk(start, s_pos)
-        if pipe_path:
-            correct_start = start
-            break
-    except Exception as e:
-        print(e)
+def find_innner_cells(current_cell, symbol, direction):
+    if symbol != "S":
+        inner_cells = inner_area_symbol_direction[(symbol, direction)]
+        inner_cells = inner_cells(*current_cell)
+        inner_cells = [cell for cell in inner_cells if is_possible_cell(cell)]
+        return inner_cells
 
 
 def draw(path):
     cell_drawing = [[" "] * MAX_ROWS for _ in range(MAX_COLS)]
-
     for cell in path:
         x = cell[0][0]
         y = cell[0][1]
         symbol = cell[1]
         cell_drawing[y][x] = symbol
-
     for cell in cell_drawing:
         print("".join(cell))
 
+
+cell = find_s(lines)
+starts = find_possible_starts(cell)
+pipe_path, inner_cells = perform_walk(starts[2], cell)
+
+# pipe_path.reverse()
+
+# def prepare_inner_cells_to_draw(inner_cells):
+#     result = []
+#     for cells in inner_cells:
+#         if cells:
+#             for cell in cells:
+#                 if cell: 
+#                     result.append((cell, "X"))
+#     return result
+
+def prepare_inner_cells_to_draw(inner_cells):
+    result = []
+    for cell in inner_cells:
+        # if cells:
+        if cell: 
+            result.append((cell, "X"))
+    return result
+
+
 draw(pipe_path)
+pipe_path = [x[0] for x in pipe_path]
+
+
+uniqie_inner_cells = []
+
+for cell in inner_cells:
+    if cell:
+        uniqie_inner_cells.extend(cell)
+
+uniqie_inner_cells = set(uniqie_inner_cells)
+pipe_path = set(pipe_path)
+
+uniqie_inner_cells = uniqie_inner_cells.difference(pipe_path)
+
+uniqie_inner_cells = list(uniqie_inner_cells)
+
+inner_cells = prepare_inner_cells_to_draw(uniqie_inner_cells)
+
+draw(inner_cells)
+
+# print(pipe_path)
+
+
+
+# remove pipe path from inner cells
+
+

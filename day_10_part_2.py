@@ -170,3 +170,14 @@ uniqie_inner_cells = list(uniqie_inner_cells)
 inner_cells = prepare_inner_cells_to_draw(uniqie_inner_cells)
 
 draw(inner_cells)
+
+
+file_path = 'day_10_drawing.txt'
+characters = ['X', 'A']
+
+with open(file_path, 'r') as file:
+    content = file.read()
+    occurrences = {char: content.count(char) for char in characters}
+
+for char, count in occurrences.items():
+    print(f"Occurrences of '{char}': {count}")

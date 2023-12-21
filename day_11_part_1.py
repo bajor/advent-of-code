@@ -36,7 +36,7 @@ def find_galaxies(matrix):
     return galaxies
 
 
-def shortest_path(grid, start, end):
+def shortest_path(start, end):
     return abs(start[0] - end[0]) + abs(start[1] - end[1])
 
 
@@ -52,6 +52,6 @@ galaxies_combinations = list(combinations(galaxies, 2))
 distances = []
 
 for start, end in galaxies_combinations:
-    distances.append(shortest_path(matrix, start, end))
+    distances.append(shortest_path(start, end))
 
 print(sum(distances))

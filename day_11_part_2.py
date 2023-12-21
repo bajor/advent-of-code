@@ -45,20 +45,18 @@ def shortest_path(start, end, expansions_h, expansions_v):
     start_y = min(start[1], end[1])
     end_y = max(start[1], end[1])
 
-    expansions = []
+    expansions = 0
 
     for x in range(start_x, end_x):
         if x in expansions_v:
-            expansions.append(1)
+            expansions += 1
 
     for y in range(start_y, end_y):
         if y in expansions_h:
-            expansions.append(1)
+            expansions += 1
 
-    expansions_len = len(expansions)
-
-    distance -= expansions_len
-    distance += expansions_len * 1000000
+    distance -= expansions 
+    distance += expansions * 1000000
     return distance
 
 

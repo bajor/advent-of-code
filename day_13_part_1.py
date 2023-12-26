@@ -22,35 +22,21 @@ def generate_split_pairs(lines):
 
         size = min(len(first), len(second))
 
-        # print(first)
-        # print(second)
-        # print(" ")
-
         if size == 1:
             first = first[-1:]
             second = second[:1]
-
-            # print(first, second)
             pairs.append([first, second])
         else:
             first = first[-size:]
             second = second[:size]
             pairs.append([first, second])
 
-
-        # if first and second:
-            # pairs.append([first, second])
-
-    # for p in pairs:
-    #     print(len(p[0]), len(p[1]))
-    # print(" ")
-
     return pairs
 
 
 def find_mirrors(pairs):
     for i in range(len(pairs)):
-        first_lines, second_lines = pairs[i] 
+        first_lines, second_lines = pairs[i]
         second_lines = second_lines[::-1]
 
         if first_lines == second_lines:
@@ -71,24 +57,9 @@ def calculate_puzzle(lines):
     mirror_position_v = find_mirror_position(vertical)
     mirror_position_h = find_mirror_position(horizontal)
 
-
-    if not mirror_position_h and not mirror_position_v:
-        # print(lines)
-        for l in lines:
-            print("".join(l))
-        print(" ")
-
-    if mirror_position_h == 0 and mirror_position_v == 0:
-        # print(lines)
-        for l in lines:
-            print("".join(l))
-        print("    ")
-
     if mirror_position_v:
         return mirror_position_v
     return mirror_position_h * 100
-
-    # return mirror_position_h + mirror_position_v * 100
 
 
 def split_lines_into_puzzles(lines):
@@ -97,28 +68,18 @@ def split_lines_into_puzzles(lines):
 
     for l in lines:
         if l == "":
-            puzzles.append(cumulated) 
+            puzzles.append(cumulated)
             cumulated = []
         else:
             cumulated.append(l)
     puzzles.append(cumulated)
-    return puzzles 
+    return puzzles
 
 
 puzzles = split_lines_into_puzzles(lines)
 total = 0
 
-
 for p in puzzles:
     total += calculate_puzzle(p)
 
 print(total)
-
-
-# 5334 - too low 
-# 28530 - too high
-# 22972 - not correcct
-
-# 27505 correct
-
-### !!! some pairs are as list but most are as strings !!!

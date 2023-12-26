@@ -1,8 +1,8 @@
 import copy 
 
 
-with open("test.txt") as file:
-# with open("day_13.txt") as file:
+# with open("test.txt") as file:
+with open("day_13.txt") as file:
     lines = [x.strip() for x in file]
 
 
@@ -20,32 +20,28 @@ def create_vertical_lists(lines):
 def generate_split_pairs(lines):
     pairs = []
 
-    for split in range(0, len(lines)):
+    for split in range(1, len(lines)):
         first = lines[:split]
         second = lines[split:]
+
+        # print(first)
+        # print(second)
+        # print(" ")
+
         size = min(len(first), len(second))
 
         if size == 1:
             first = first[-1:]
             second = second[:1]
-
-            # if len(lines) > 1:
-            first = ["".join(l) for l in first]
-            second = ["".join(l) for l in second]
-
         else:
-            first = first[-2:]
-            second = second[:2]
-
-            first = ["".join(l) for l in first]
-            second = ["".join(l) for l in second]
-            # if len(lines) > 1:
-            #     lines = ["".join(l) for l in lines]
+            first = first[-size:]
+            second = second[:size]
 
         if first and second:
             pairs.append([first, second])
 
-    # print(pairs)
+    # for p in pairs:
+        # print(len(p[0]), len(p[1]))
     # print(" ")
 
     return pairs
@@ -57,7 +53,7 @@ def find_mirrors(pairs):
         second_lines = second_lines[::-1]
 
         if first_lines == second_lines:
-            return i
+            return i + 1
     return 0
 
 
@@ -69,25 +65,24 @@ def find_mirror_position(lines):
 
 def calculate_puzzle(lines):
     horizontal = lines
-    vertical = create_vertical_lists(lines)
+    vertical = create_vertical_lists([lines])
 
     mirror_position_v = find_mirror_position(vertical)
     mirror_position_h = find_mirror_position(horizontal)
 
 
+    # if not mirror_position_h and not mirror_position_v:
+        # print(lines)
+        # for l in lines:
+            # print("".join(l))
+        # print(" ")
     if mirror_position_h == 0 and mirror_position_v == 0:
         # print(lines)
         for l in lines:
             print("".join(l))
-
         print("    ")
 
-    # print(mirror_position_v, mirror_position_h)
-
-
-    result = mirror_position_h + mirror_position_v * 100
-    return result
-
+    return mirror_position_h + mirror_position_v * 100
 
 def split_lines_into_puzzles(lines):
     cumulated = []

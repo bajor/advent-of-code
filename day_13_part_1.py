@@ -1,3 +1,5 @@
+import copy
+
 # with open("test.txt") as file:
 with open("day_13.txt") as file:
     lines = [x.strip() for x in file]
@@ -17,25 +19,28 @@ def generate_split_pairs(lines):
     pairs = []
 
     for split in range(0, len(lines)):
-        first = lines[:split]
-        second = lines[split:]
+        first = copy.deepcopy(lines[:split])
+        second = copy.deepcopy(lines[split:])
         size = min(len(first), len(second))
 
         if size == 1:
             first = first[-1:]
             second = second[:1]
+            lines = ["".join(l) for l in lines]
         else:
             first = first[-2:]
             second = second[:2]
 
-        pairs.append([first, second])
+        if first and second:
+            pairs.append([first, second])
+
     return pairs
 
 
 def find_mirrors(pairs):
     for i in range(len(pairs)):
         first_lines, second_lines = pairs[i] 
-        second_lines = list(reversed(second_lines))
+        second_lines = second_lines[::-1]
 
         if first_lines == second_lines:
             return i
@@ -55,7 +60,7 @@ def calculate_puzzle(lines):
     mirror_position_v = find_mirror_position(vertical)
     mirror_position_h = find_mirror_position(horizontal)
 
-    result = mirror_position_h * 100 + mirror_position_v
+    result = mirror_position_h + mirror_position_v * 100
     return result
 
 
@@ -76,12 +81,13 @@ def split_lines_into_puzzles(lines):
 puzzles = split_lines_into_puzzles(lines)
 total = 0
 
-print(puzzles)
 
 for p in puzzles:
     total += calculate_puzzle(p)
 
 print(total)
 
+
 # 5334 - too low 
 # 28530 - too high
+# 22972 - not correcct

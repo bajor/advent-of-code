@@ -1,13 +1,7 @@
 from functools import cache
 
-# TODO:
-# uproscic to zeby byl call na 1 funkcje tylko - jedna  
-# z powtarzajacymi sie cache'ami
 
-# map instead of for loops and multiprocessing
-
-# with open("day_14.txt") as file:
-with open("test.txt") as file:
+with open("day_14.txt") as file:
     lines = tuple([tuple(list(x.strip())) for x in file])
 
 
@@ -125,10 +119,8 @@ def perform_cycle(lines):
 
 
 for i in range(CYCLES):
-    if i % 10000000 == 0:
-    # if i % 100000 == 0:
-        print((CYCLES-i)/CYCLES)
-
+    if i % 1000000 == 0:
+        print((CYCLES - i) / CYCLES)
     lines = perform_cycle(lines)
 
 for l in lines:
@@ -143,7 +135,7 @@ for i in range(len(lines)):
 
 for j in range(len(lines)):
     for i in range(len(lines[0])):
-        distance = len(lines) - j 
+        distance = len(lines) - j
         if lines[j][i] == "O":
             total_load += distance
 

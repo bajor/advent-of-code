@@ -1,36 +1,34 @@
 with open("day_15.txt") as file:
-# with open("test.txt") as file:
     values_list = file.read().split(",")
 
 
-def calculate_hash(char, value=0):
+def calculate_hash_char(char, value=0):
     char = ord(char)
     char = (char + value) * 17
     return char % 256
 
 
-def calculate_list_hash(chars):
+def calculate_hash_list(chars):
     result = 0
     for c in chars:
-        result = calculate_hash(c, result)
+        result = calculate_hash_char(c, result)
     return result
 
 
-def calculate_hash_map():
+def generate_hash_map():
     hash_map = {}
 
     for v in values_list:
-        label = v[:2]
-        key = calculate_list_hash(label)
-        key += 1
+        label = v.split("=")[0]
+        label = label.split("-")[0]
+        key = calculate_hash_list(label) + 1
         value = v[-1]
 
         if (not key in hash_map) and value.isdigit():
             hash_map[key] = [v]
-        else:
+        elif key in hash_map:
             lenses = hash_map[key]
-            lenses = [x[:2] for x in lenses]
-
+            lenses = [x.split("=")[0] for x in lenses]
             if key in hash_map:
                 if value == "-":
                     if label in lenses:
@@ -53,12 +51,11 @@ def calculate_hash_map():
 def calculate_lenses(box_id, lenses):
     result = 0
     for i in range(len(lenses)):
-        result += box_id * (i+1) * lenses[i]
+        result += box_id * (i + 1) * lenses[i]
     return result
 
 
-hash_map = calculate_hash_map()
-
+hash_map = generate_hash_map()
 result = 0
 
 for k, v in hash_map.items():

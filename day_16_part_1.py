@@ -54,10 +54,8 @@ def find_next_direction(current_direction, coordinates):
 
     if new_tile == "|":
         if current_direction == "right" or current_direction == "left":
-            if not ("up", coordinates) in visited:
-                perform_walk(coordinates, "up", [])
-            if not ("down", coordinates) in visited:
-                perform_walk(coordinates, "down", [])
+            perform_walk(coordinates, "up", [])
+            perform_walk(coordinates, "down", [])
             return False
 
         if current_direction == "up" or current_direction == "down":
@@ -65,10 +63,8 @@ def find_next_direction(current_direction, coordinates):
 
     if new_tile == "-":
         if current_direction == "up" or current_direction == "down":
-            if not ("right", coordinates) in visited:
-                perform_walk(coordinates, "right", [])
-            if not ("left", coordinates) in visited:
-                perform_walk(coordinates, "left", [])
+            perform_walk(coordinates, "right", [])
+            perform_walk(coordinates, "left", [])
             return False
 
         if current_direction == "right" or current_direction == "left":

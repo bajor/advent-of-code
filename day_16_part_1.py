@@ -3,8 +3,8 @@ with open("test.txt") as file:
     lines = [x.strip() for x in file]
 
 
-MAX_ROW = len(lines)
-MAX_COL = len(lines[0])
+MAX_ROW = len(lines) - 1
+MAX_COL = len(lines[0]) - 1
 
 MOVE_DIRS = {
     "up": (0, -1), 
@@ -23,15 +23,17 @@ def create_grid_map(lines):
 
 
 def check_if_finish(x, y, history):
-    if x < 0 or x >= MAX_COL:
-        all_walks_histories.append(history)
+    if x < 0 or x > MAX_COL:
+        all_walks_histories.extend(history)
         return True
-    if y < 0 or y >= MAX_ROW:
-        all_walks_histories.append(history)
+    if y < 0 or y > MAX_ROW:
+        all_walks_histories.extend(history)
         return True
 
 
-def find_next_direction(current_direction, new_tile):
+def find_next_direction(current_direction, coordinates):
+    new_tile = GRID[coordinates]
+
     if new_tile == ".":
         next_direction = current_direction
 
@@ -55,14 +57,39 @@ def find_next_direction(current_direction, new_tile):
         if current_direction == "down":
             next_direction = "left" 
 
-    # TODO: pozostała logika do splitów, 
-            # start new two perform walks (if possible) 
-            # but return False for the old chain
+    if new_tile == "|":
+        if current_direction == "right" or current_direction == "left":
+            perform_walk(coordinates, "up", [])
+            perform_walk(coordinates, "down", [])
+            return False
+
+        if current_direction == "up" or current_direction == "down":
+            next_direction = current_direction
+
+    if new_tile == "-":
+        if current_direction == "up" or current_direction == "down":
+            perform_walk(coordinates, "right", [])
+            perform_walk(coordinates, "left", [])
+            return False
+
+        if current_direction == "right" or current_direction == "left":
+            next_direction = current_direction
 
     return next_direction
 
 
 def perform_walk(current_coords, current_direction, history):
+    # if len(history) > 100:
+    #     if len(set(history)) / len(history) < 0.1:
+    #         all_walks_histories.extend(history)
+    #         return
+
+    if ((current_coords, current_direction)) in checked_coord_dir:
+        all_walks_histories.extend(history)
+        return
+    else:
+        checked_coord_dir.append((current_coords, current_direction)) 
+
     step = MOVE_DIRS[current_direction]
 
     new_x = current_coords[0] + step[0]
@@ -71,11 +98,14 @@ def perform_walk(current_coords, current_direction, history):
     if check_if_finish(new_x, new_y, history):
         return
 
-    new_tile = GRID[(new_x, new_y)]
-
-    next_direction = find_next_direction(current_direction, new_tile)
+    next_direction = find_next_direction(current_direction, (new_x, new_y))
 
     history.append((new_x, new_y))
+
+    if next_direction == False:
+        all_walks_histories.extend(history)
+        return
+
     perform_walk((new_x, new_y), next_direction, history)
 
 
@@ -85,6 +115,8 @@ start_position = (0,0)
 start_direction = "right"
 
 all_walks_histories = [start_position]
-
+checked_coord_dir = []
 perform_walk(start_position, start_direction, [])
 print(all_walks_histories)
+
+print(len(set(all_walks_histories)))

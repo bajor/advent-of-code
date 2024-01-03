@@ -1,17 +1,11 @@
-# with open("day_16.txt") as file:
-with open("test.txt") as file:
+with open("day_16.txt") as file:
     lines = [x.strip() for x in file]
 
 
 MAX_ROW = len(lines) - 1
 MAX_COL = len(lines[0]) - 1
 
-MOVE_DIRS = {
-    "up": (0, -1), 
-    "down": (0, 1), 
-    "right": (1, 0), 
-    "left": (-1, 0)
-    }
+MOVE_DIRS = {"up": (0, -1), "down": (0, 1), "right": (1, 0), "left": (-1, 0)}
 
 
 def create_grid_map(lines):
@@ -22,7 +16,8 @@ def create_grid_map(lines):
     return grid
 
 
-def check_if_finish(x, y, history):
+def is_finished(coords, history):
+    x, y = coords
     if x < 0 or x > MAX_COL:
         all_walks_histories.extend(history)
         return True
@@ -53,14 +48,16 @@ def find_next_direction(current_direction, coordinates):
         if current_direction == "left":
             next_direction = "down"
         if current_direction == "up":
-            next_direction = "right" 
+            next_direction = "right"
         if current_direction == "down":
-            next_direction = "left" 
+            next_direction = "left"
 
     if new_tile == "|":
         if current_direction == "right" or current_direction == "left":
-            perform_walk(coordinates, "up", [])
-            perform_walk(coordinates, "down", [])
+            if not ("up", coordinates) in visited:
+                perform_walk(coordinates, "up", [])
+            if not ("down", coordinates) in visited:
+                perform_walk(coordinates, "down", [])
             return False
 
         if current_direction == "up" or current_direction == "down":
@@ -68,8 +65,10 @@ def find_next_direction(current_direction, coordinates):
 
     if new_tile == "-":
         if current_direction == "up" or current_direction == "down":
-            perform_walk(coordinates, "right", [])
-            perform_walk(coordinates, "left", [])
+            if not ("right", coordinates) in visited:
+                perform_walk(coordinates, "right", [])
+            if not ("left", coordinates) in visited:
+                perform_walk(coordinates, "left", [])
             return False
 
         if current_direction == "right" or current_direction == "left":
@@ -79,44 +78,41 @@ def find_next_direction(current_direction, coordinates):
 
 
 def perform_walk(current_coords, current_direction, history):
-    # if len(history) > 100:
-    #     if len(set(history)) / len(history) < 0.1:
-    #         all_walks_histories.extend(history)
-    #         return
+    while not is_finished(current_coords, history):
+        if (current_coords, current_direction) in visited:
+            all_walks_histories.extend(history)
+            return
+        else:
+            visited.append((current_coords, current_direction))
 
-    if ((current_coords, current_direction)) in checked_coord_dir:
-        all_walks_histories.extend(history)
-        return
-    else:
-        checked_coord_dir.append((current_coords, current_direction)) 
+        step = MOVE_DIRS[current_direction]
 
-    step = MOVE_DIRS[current_direction]
+        new_x = current_coords[0] + step[0]
+        new_y = current_coords[1] + step[1]
 
-    new_x = current_coords[0] + step[0]
-    new_y = current_coords[1] + step[1]
+        if is_finished((new_x, new_y), history):
+            return
 
-    if check_if_finish(new_x, new_y, history):
-        return
+        next_direction = find_next_direction(current_direction, (new_x, new_y))
 
-    next_direction = find_next_direction(current_direction, (new_x, new_y))
+        history.append((new_x, new_y))
 
-    history.append((new_x, new_y))
+        if next_direction == False:
+            all_walks_histories.extend(history)
+            return
 
-    if next_direction == False:
-        all_walks_histories.extend(history)
-        return
-
-    perform_walk((new_x, new_y), next_direction, history)
+        current_coords = (new_x, new_y)
+        current_direction = next_direction
 
 
 GRID = create_grid_map(lines)
 
-start_position = (0,0)
-start_direction = "right"
+start_position = (0, 0)
+start_direction = "down"
 
 all_walks_histories = [start_position]
-checked_coord_dir = []
+visited = []
+
 perform_walk(start_position, start_direction, [])
-print(all_walks_histories)
 
 print(len(set(all_walks_histories)))
